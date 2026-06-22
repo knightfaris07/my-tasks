@@ -334,9 +334,129 @@ input,textarea,select{font-family:inherit;outline:none}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+
+/* ══════════════════════════════════════════
+   ✦ ANIMATIONS & SIGNATURE EFFECTS ✦
+   ══════════════════════════════════════════ */
+
+/* ── Aurora background orbs ── */
+.bg-orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.bg-orb{position:absolute;border-radius:50%;filter:blur(90px);animation:orbDrift ease-in-out infinite}
+.bg-orb-1{width:650px;height:650px;background:radial-gradient(circle at 40% 40%,rgba(108,99,255,.20),transparent 70%);top:-180px;left:-180px;animation-duration:24s}
+.bg-orb-2{width:550px;height:550px;background:radial-gradient(circle at 60% 60%,rgba(232,121,160,.15),transparent 70%);top:25%;right:-220px;animation-duration:31s;animation-delay:-9s}
+.bg-orb-3{width:480px;height:480px;background:radial-gradient(circle at 50% 50%,rgba(38,198,218,.13),transparent 70%);bottom:8%;left:5%;animation-duration:38s;animation-delay:-17s}
+.bg-orb-4{width:320px;height:320px;background:radial-gradient(circle at 50% 50%,rgba(255,112,67,.10),transparent 70%);bottom:35%;right:5%;animation-duration:21s;animation-delay:-5s}
+@keyframes orbDrift{
+  0%  {transform:translate(0,0) scale(1)}
+  25% {transform:translate(45px,-55px) scale(1.08)}
+  50% {transform:translate(-35px,45px) scale(.93)}
+  75% {transform:translate(55px,25px) scale(1.05)}
+  100%{transform:translate(0,0) scale(1)}
+}
+[data-theme="light"] .bg-orb-1{background:radial-gradient(circle at 40% 40%,rgba(108,99,255,.07),transparent 70%)}
+[data-theme="light"] .bg-orb-2{background:radial-gradient(circle at 60% 60%,rgba(232,121,160,.05),transparent 70%)}
+[data-theme="light"] .bg-orb-3{background:radial-gradient(circle at 50% 50%,rgba(38,198,218,.05),transparent 70%)}
+[data-theme="light"] .bg-orb-4{background:radial-gradient(circle at 50% 50%,rgba(255,112,67,.04),transparent 70%)}
+
+/* ── FX canvas & toast ── */
+#fxCanvas{position:fixed;inset:0;pointer-events:none;z-index:9999;display:none}
+#toastEl{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1.5px solid var(--border);padding:11px 22px;border-radius:40px;font-size:14px;font-weight:600;color:var(--text);box-shadow:0 8px 32px rgba(0,0,0,.35);z-index:800;opacity:0;pointer-events:none;transition:opacity .3s,transform .4s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;display:flex;align-items:center;gap:8px}
+#toastEl.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── Entrance animations ── */
+@keyframes enterUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes enterFade{from{opacity:0}to{opacity:1}}
+.app.entering .header{animation:enterUp .5s .0s cubic-bezier(.34,1.56,.64,1) both}
+.app.entering .stats-card{animation:enterUp .55s .08s cubic-bezier(.34,1.56,.64,1) both}
+.app.entering .streak-card{animation:enterUp .55s .16s cubic-bezier(.34,1.56,.64,1) both}
+.app.entering .prayer-banner{animation:enterUp .55s .24s cubic-bezier(.34,1.56,.64,1) both}
+.app.entering .search-wrap{animation:enterUp .5s .30s cubic-bezier(.34,1.56,.64,1) both}
+.app.entering .filter-tabs{animation:enterUp .5s .36s cubic-bezier(.34,1.56,.64,1) both}
+.app.entering .task-list{animation:enterFade .5s .42s both}
+
+/* ── Task tile stagger ── */
+@keyframes taskIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.task-tile{animation:taskIn .38s cubic-bezier(.34,1.56,.64,1) both}
+.task-tile:nth-child(1){animation-delay:0ms}.task-tile:nth-child(2){animation-delay:50ms}.task-tile:nth-child(3){animation-delay:100ms}.task-tile:nth-child(4){animation-delay:150ms}.task-tile:nth-child(5){animation-delay:190ms}.task-tile:nth-child(6){animation-delay:225ms}.task-tile:nth-child(n+7){animation-delay:255ms}
+
+/* ── Check circle bounce ── */
+@keyframes checkPop{0%{transform:scale(1)}35%{transform:scale(1.50)}65%{transform:scale(.88)}100%{transform:scale(1)}}
+.check-circle.pop{animation:checkPop .42s cubic-bezier(.36,.07,.19,.97)}
+.task-tile.completed .check-circle{box-shadow:0 0 0 3px rgba(108,99,255,.18),0 0 14px rgba(108,99,255,.20)}
+
+/* ── Progress bar shimmer ── */
+.progress-fill{position:relative;overflow:hidden}
+.progress-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.45) 50%,transparent 100%);animation:shimmer 2.4s ease-in-out infinite}
+@keyframes shimmer{0%{transform:translateX(-150%)}100%{transform:translateX(150%)} }
+
+/* ── Stats percentage morph ── */
+@keyframes pctPop{0%{transform:scale(1)}50%{transform:scale(1.18)}100%{transform:scale(1)}}
+.stats-pct.pop{animation:pctPop .35s cubic-bezier(.34,1.56,.64,1)}
+
+/* ── All-done green glow ── */
+@keyframes allDoneGlow{0%,100%{box-shadow:0 8px 28px rgba(38,169,108,.3)}50%{box-shadow:0 12px 48px rgba(38,169,108,.6)}}
+.stats-card.all-done{background:linear-gradient(135deg,#1f9e6c 0%,#167a52 100%) !important;animation:allDoneGlow 2.2s ease-in-out infinite}
+
+/* ── Ripple ── */
+.ripple-fx{position:absolute;border-radius:50%;background:rgba(255,255,255,.22);transform:scale(0);pointer-events:none;animation:rippleGo .65s ease-out forwards}
+@keyframes rippleGo{to{transform:scale(1);opacity:0}}
+
+/* ── FAB breathing + hover ── */
+.fab{animation:fabGlow 3s ease-in-out infinite}
+@keyframes fabGlow{0%,100%{box-shadow:0 6px 20px rgba(91,63,232,.5),0 2px 6px rgba(0,0,0,.2)}50%{box-shadow:0 8px 36px rgba(91,63,232,.78),0 2px 8px rgba(0,0,0,.25)}}
+.fab:hover{animation:none;box-shadow:0 12px 40px rgba(91,63,232,.7)}
+
+/* ── Avatar halo ── */
+.avatar{transition:box-shadow .3s,transform .25s}
+.avatar:hover{box-shadow:0 0 0 3px var(--primary-glow),0 0 22px var(--primary-glow);transform:scale(1.1)}
+
+/* ── Theme button spin ── */
+.theme-btn{transition:transform .3s,background .2s}
+.theme-btn:hover{transform:scale(1.15) rotate(22deg) !important}
+
+/* ── Streak fire ── */
+@keyframes fireDance{0%,100%{transform:scale(1) translateY(0) rotate(-3deg)}50%{transform:scale(1.25) translateY(-4px) rotate(3deg)}}
+.streak-icon{display:inline-block;animation:fireDance 1.7s ease-in-out infinite}
+
+/* ── Auth card subtle float ── */
+@keyframes cardFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.auth-card{animation:cardFloat 5.5s ease-in-out infinite}
+.auth-card:focus-within{animation-play-state:paused}
+
+/* ── Prayer dot pulse ── */
+@keyframes prayerPulse{0%,100%{box-shadow:0 0 0 2px var(--primary-glow)}50%{box-shadow:0 0 0 6px rgba(108,99,255,.08),0 0 18px rgba(108,99,255,.18)}}
+.prayer-dot.next{animation:prayerPulse 1.6s ease-in-out infinite}
+
+/* ── Stats card hover ── */
+.stats-card{transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s}
+.stats-card:not(.all-done):hover{transform:translateY(-4px);box-shadow:0 18px 48px var(--primary-glow)}
+
+/* ── Streak & prayer hover lift ── */
+.streak-card,.prayer-banner{transition:transform .3s,box-shadow .3s}
+.streak-card:hover,.prayer-banner:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,0,0,.18)}
+
+/* ── Task card 3D hover (desktop) ── */
+@media(hover:hover){
+  .task-tile{transition:box-shadow .25s,border-color .25s;transform-style:preserve-3d}
+  .task-tile:hover{box-shadow:0 12px 32px rgba(0,0,0,.22)}
+}
+
+/* ── Streak dot active pulse ── */
+@keyframes dotPop{0%{transform:scale(1)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
+.streak-dot.active{animation:dotPop .5s cubic-bezier(.34,1.56,.64,1)}
 </style>
 </head>
 <body>
+
+<!-- ── Background aurora orbs ── -->
+<div class="bg-orbs" aria-hidden="true">
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
+  <div class="bg-orb bg-orb-4"></div>
+</div>
+<canvas id="fxCanvas"></canvas>
+<div id="toastEl"></div>
 
 <!-- ── Auth screen ─────────────────────────────────────────── -->
 <div class="auth-screen" id="authScreen">
@@ -932,7 +1052,10 @@ async function initApp() {
 
 async function showApp() {
   document.getElementById('authScreen').style.display='none';
-  document.getElementById('mainApp').style.display='block';
+  const app = document.getElementById('mainApp');
+  app.style.display='block';
+  app.classList.add('entering');
+  setTimeout(() => app.classList.remove('entering'), 1600);
   if (currentUser) {
     const phoneDisplay = currentUser.phone || '';
     document.getElementById('avatarBtn').textContent = phoneDisplay.replace(/^\+\d+/, '')[0] || phoneDisplay[0] || '?';
@@ -941,6 +1064,8 @@ async function showApp() {
   await Promise.all([loadCategories(), loadTasks(), loadStreakFromAPI()]);
   renderCatChips();
   loadPrayers();
+  initMagneticFAB();
+  initRipples();
   setInterval(renderPrayer, 60000);
   setInterval(setGreeting, 60000);
 }
@@ -1155,18 +1280,25 @@ async function saveTask() {
       state.tasks.unshift(apiToLocal(await api('POST','/api/tasks',payload)));
     }
     render(); document.getElementById('addOverlay').classList.remove('open');
+    showToast(state.editingId?'Task updated ✏️':'Task added ✨');
   } catch(e) { alert('Save failed: '+e.message); }
   finally { document.getElementById('saveBtnLabel').textContent=state.editingId?'Save Changes':'Add Task'; }
 }
 async function toggleTask(id) {
   const t=state.tasks.find(x=>x.id===id); if(!t)return;
+  // Capture check position before re-render
+  const tile=document.querySelector(`.task-tile[data-id="${id}"]`);
+  const chk=tile?.querySelector('.check-circle');
+  let bx,by;
+  if(chk){const r=chk.getBoundingClientRect();bx=r.left+r.width/2;by=r.top+r.height/2;chk.classList.add('pop');}
   t.completed=!t.completed; render();
+  if(bx) burstAt(bx,by);
   try {
     const {task,spawned}=await api('POST',`/api/tasks/${id}/toggle`);
     const i=state.tasks.findIndex(x=>x.id===id);
     if(i!==-1) state.tasks[i]=apiToLocal(task);
     if(spawned) state.tasks.unshift(apiToLocal(spawned));
-    if(task.completed) loadStreakFromAPI();
+    if(task.completed){loadStreakFromAPI();showToast('Task done! 🎯');}
     render();
   } catch { t.completed=!t.completed; render(); }
 }
@@ -1262,18 +1394,32 @@ function getFiltered(){
     }
   });
 }
+let _prevPct = 0, _wasAllDone = false;
 function renderStats(){
   const now=new Date();
   const isT=d=>d&&d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth()&&d.getDate()===now.getDate();
   const rel=state.tasks.filter(t=>{const d=t.dueDate?new Date(t.dueDate):null;return isT(d)||!d;});
   const total=rel.length,done=rel.filter(t=>t.completed).length,left=total-done;
   const pct=total?Math.round(done/total*100):0;
-  document.getElementById('statsMain').textContent=left===0&&total>0?'All done! 🎉':`${left} task${left!==1?'s':''} remaining`;
+  const allDone=left===0&&total>0;
+  document.getElementById('statsMain').textContent=allDone?'All done! 🎉':`${left} task${left!==1?'s':''} remaining`;
   document.getElementById('progressFill').style.width=pct+'%';
-  document.getElementById('statTotal').textContent=total;
-  document.getElementById('statDone').textContent=done;
-  document.getElementById('statLeft').textContent=left;
-  document.getElementById('statsPct').textContent=pct+'%';
+  animateNum(document.getElementById('statTotal'),total);
+  animateNum(document.getElementById('statDone'),done);
+  animateNum(document.getElementById('statLeft'),left);
+  const pctEl=document.getElementById('statsPct');
+  if(pct!==_prevPct){pctEl.classList.remove('pop');void pctEl.offsetWidth;pctEl.classList.add('pop');}
+  pctEl.textContent=pct+'%'; _prevPct=pct;
+  const card=document.querySelector('.stats-card');
+  if(card){
+    if(allDone){
+      card.classList.add('all-done');
+      if(!_wasAllDone){setTimeout(launchConfetti,350);showToast('All done! Amazing! 🎉');}
+    } else {
+      card.classList.remove('all-done');
+    }
+  }
+  _wasAllDone=allDone;
 }
 function dueBadge(t){
   if(!t.dueDate)return'';
@@ -1303,7 +1449,7 @@ function render(){
     const prioLabel=t.priority.charAt(0).toUpperCase()+t.priority.slice(1);
     const recBadge=t.recurrence&&t.recurrence!=='none'?`<span class="recurrence-badge"><svg width="11" height="11" fill="none" viewBox="0 0 24 24"><path d="M1 4v6h6M23 20v-6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>${t.recurrence.charAt(0).toUpperCase()+t.recurrence.slice(1)}</span>`:'';
     const pl=t.hasTime&&t.dueDate?prayerLabel(new Date(t.dueDate)):null;
-    return`<div class="task-tile ${t.completed?'completed':''}" style="border-color:${borderColor}" onclick="openDetail('${t.id}')">
+    return`<div class="task-tile ${t.completed?'completed':''}" data-id="${t.id}" style="border-color:${borderColor}" onclick="openDetail('${t.id}')">
       <div class="check-circle" onclick="event.stopPropagation();toggleTask('${t.id}')">
         <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
@@ -1324,6 +1470,7 @@ function render(){
       </div>
     </div>`;
   }).join('');
+  setTimeout(initCardTilt, 80);
 }
 
 // ── Add/Edit sheet ─────────────────────────────────────────
@@ -1476,6 +1623,127 @@ async function sendAIPrompt(text){
 }
 
 // ── Boot ──────────────────────────────────────────────────
+// ══════════════════════════════════════════
+// ✦ ANIMATION ENGINE ✦
+// ══════════════════════════════════════════
+
+// ── Particle FX (confetti + burst) ────────
+const _canvas = document.getElementById('fxCanvas');
+const _ctx = _canvas.getContext('2d');
+let _particles = [], _rafId = null;
+function _ensureSize() {
+  if (_canvas.width !== window.innerWidth) { _canvas.width = window.innerWidth; _canvas.height = window.innerHeight; }
+}
+function _fxLoop() {
+  _ctx.clearRect(0, 0, _canvas.width, _canvas.height);
+  _particles = _particles.filter(p => p.alpha > 0.015);
+  _particles.forEach(p => {
+    _ctx.save(); _ctx.globalAlpha = p.alpha; _ctx.translate(p.x, p.y);
+    if (p.confetti) {
+      _ctx.rotate(p.rot); _ctx.fillStyle = p.color;
+      _ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      p.rot += p.rotV; p.vy += 0.14; p.alpha -= 0.011;
+    } else {
+      _ctx.fillStyle = p.color; _ctx.beginPath();
+      _ctx.arc(0, 0, p.r, 0, Math.PI*2); _ctx.fill();
+      p.r *= 0.92; p.alpha -= 0.038;
+    }
+    _ctx.restore();
+    p.x += p.vx; p.y += p.vy; p.vx *= p.drag||1;
+  });
+  if (_particles.length) { _rafId = requestAnimationFrame(_fxLoop); }
+  else { _canvas.style.display='none'; _rafId = null; }
+}
+function _fxStart() { if (!_rafId) { _canvas.style.display='block'; _fxLoop(); } }
+
+const BURST_COLORS = ['#6C63FF','#E879A0','#4CAF7D','#FFD700','#26C6DA','#FF7043','#9575CD'];
+function burstAt(x, y) {
+  _ensureSize();
+  for (let i=0; i<18; i++) {
+    const a=(i/18)*Math.PI*2, s=Math.random()*5+2.5;
+    _particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,r:Math.random()*5+3,
+      color:BURST_COLORS[i%BURST_COLORS.length],alpha:1,drag:.91,confetti:false});
+  }
+  _fxStart();
+}
+function launchConfetti() {
+  _ensureSize();
+  const W=_canvas.width;
+  for (let i=0; i<150; i++) {
+    _particles.push({x:Math.random()*W,y:Math.random()*-250-30,
+      vx:(Math.random()-.5)*7,vy:Math.random()*4+1,
+      w:Math.random()*11+5,h:Math.random()*6+3,
+      rot:Math.random()*Math.PI*2,rotV:(Math.random()-.5)*.28,
+      color:BURST_COLORS[Math.floor(Math.random()*BURST_COLORS.length)],
+      alpha:1,drag:.99,confetti:true});
+  }
+  _fxStart();
+}
+
+// ── Toast ─────────────────────────────────
+let _toastTimer=null;
+function showToast(msg) {
+  const el=document.getElementById('toastEl');
+  el.textContent=msg; el.classList.add('show');
+  if (_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(()=>el.classList.remove('show'), 2600);
+}
+
+// ── Animated number counter ───────────────
+function animateNum(el, to, dur=500) {
+  const from=parseInt(el.textContent)||0; if(from===to) return;
+  const t0=performance.now();
+  const tick=now=>{
+    const p=Math.min((now-t0)/dur,1), e=1-Math.pow(1-p,3);
+    el.textContent=Math.round(from+(to-from)*e);
+    if(p<1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+// ── Ripple on buttons ─────────────────────
+function addRipple(e) {
+  const btn=e.currentTarget;
+  const r=document.createElement('span'); r.className='ripple-fx';
+  const rect=btn.getBoundingClientRect(), size=Math.max(rect.width,rect.height)*2.2;
+  r.style.cssText=`width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+  btn.appendChild(r); setTimeout(()=>r.remove(), 750);
+}
+function initRipples() {
+  document.querySelectorAll('.fab,.auth-btn,.save-btn,.add-cat-btn,.tab').forEach(btn=>{
+    if (btn.dataset.rl) return; btn.dataset.rl='1'; btn.addEventListener('click',addRipple);
+  });
+}
+
+// ── Magnetic FAB ──────────────────────────
+function initMagneticFAB() {
+  const fab=document.querySelector('.fab');
+  if (!fab||window.matchMedia('(pointer:coarse)').matches) return;
+  fab.addEventListener('mousemove',e=>{
+    const r=fab.getBoundingClientRect();
+    const dx=(e.clientX-r.left-r.width/2)*0.22, dy=(e.clientY-r.top-r.height/2)*0.22;
+    fab.style.transform=`translateY(${dy}px) translateX(${dx}px)`;
+  });
+  fab.addEventListener('mouseleave',()=>{
+    fab.style.transition='transform .5s cubic-bezier(.34,1.56,.64,1)';
+    fab.style.transform=''; setTimeout(()=>fab.style.transition='',500);
+  });
+}
+
+// ── Card 3-D tilt on hover ────────────────
+function initCardTilt() {
+  if (window.matchMedia('(pointer:coarse)').matches) return;
+  document.querySelectorAll('.task-tile').forEach(card=>{
+    if (card.dataset.tilt) return; card.dataset.tilt='1';
+    card.addEventListener('mousemove',e=>{
+      const r=card.getBoundingClientRect();
+      const x=(e.clientX-r.left)/r.width-.5, y=(e.clientY-r.top)/r.height-.5;
+      card.style.transform=`perspective(500px) translateY(-2px) rotateX(${-y*5}deg) rotateY(${x*5}deg)`;
+    });
+    card.addEventListener('mouseleave',()=>{card.style.transform='';});
+  });
+}
+
 initApp();
 </script>
 </body>
