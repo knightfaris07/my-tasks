@@ -1,0 +1,19 @@
+{
+  "name": "todo-website-backend",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "@simplewebauthn/server": "^9.0.3",
+    "@supabase/supabase-js": "^2.108.2",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "uuid": "^11.1.0"
+  }
+}
