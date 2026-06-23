@@ -351,6 +351,67 @@ app.post('/api/streak/record', auth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ── Apple Calendar ICS feed ───────────────────────────────
+function fmtICS(d) { return d.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z'; }
+function fmtICSDate(d) { return d.toISOString().slice(0,10).replace(/-/g,''); }
+function escICS(s) { return (s||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n'); }
+function foldICS(line) {
+  if (line.length <= 75) return line;
+  let out = line.slice(0,75); let i = 75;
+  while (i < line.length) { out += '\r\n ' + line.slice(i, i+74); i += 74; }
+  return out;
+}
+
+app.get('/api/user/calendar-token', auth, async (req, res) => {
+  try {
+    const { data: user } = await sb.from('users').select('calendar_token').eq('id', req.user.id).single();
+    let tok = user?.calendar_token;
+    if (!tok) {
+      tok = uuidv4();
+      await sb.from('users').update({ calendar_token: tok }).eq('id', req.user.id);
+    }
+    const origin = process.env.RP_ORIGIN || 'https://todowebsite-six.vercel.app';
+    res.json({ url: `${origin}/api/calendar/${tok}`, token: tok });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/calendar/:token', async (req, res) => {
+  try {
+    const { data: user } = await sb.from('users').select('id').eq('calendar_token', req.params.token).maybeSingle();
+    if (!user) return res.status(404).end();
+    const { data: tasks } = await sb.from('tasks').select('*').eq('user_id', user.id).not('due_date', 'is', null);
+    const now = new Date();
+    const lines = [
+      'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//My Tasks//EN',
+      'CALSCALE:GREGORIAN','METHOD:PUBLISH',
+      'X-WR-CALNAME:My Tasks','X-WR-CALDESC:Tasks from My Tasks',
+    ];
+    for (const t of (tasks || [])) {
+      const s = new Date(t.due_date);
+      const e = new Date(s.getTime() + 3600000);
+      const prio = t.priority==='high' ? 1 : t.priority==='medium' ? 5 : 9;
+      const evLines = [
+        'BEGIN:VEVENT',
+        `UID:${t.id}@my-tasks`,
+        `DTSTAMP:${fmtICS(now)}`,
+        t.has_time ? `DTSTART:${fmtICS(s)}` : `DTSTART;VALUE=DATE:${fmtICSDate(s)}`,
+        t.has_time ? `DTEND:${fmtICS(e)}` : `DTEND;VALUE=DATE:${fmtICSDate(s)}`,
+        foldICS(`SUMMARY:${escICS(t.title)}`),
+        t.notes ? foldICS(`DESCRIPTION:${escICS(t.notes)}`) : null,
+        `STATUS:${t.completed ? 'COMPLETED' : 'CONFIRMED'}`,
+        `PRIORITY:${prio}`,
+        'END:VEVENT',
+      ].filter(Boolean);
+      lines.push(...evLines);
+    }
+    lines.push('END:VCALENDAR');
+    res.setHeader('Content-Type','text/calendar; charset=utf-8');
+    res.setHeader('Content-Disposition','inline; filename="my-tasks.ics"');
+    res.setHeader('Cache-Control','no-cache, must-revalidate');
+    res.send(lines.join('\r\n'));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ── Public config (non-secret values for the frontend) ───
 app.get('/api/config', (req, res) => {
   res.json({ geminiKey: process.env.GEMINI_KEY || '' });

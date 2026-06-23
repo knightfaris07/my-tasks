@@ -66,16 +66,6 @@ input,textarea,select{font-family:inherit;outline:none}
 .phone-input::placeholder{color:var(--text3)}
 .phone-input:focus{border-color:rgba(108,99,255,.6);box-shadow:0 0 0 3px var(--primary-glow);outline:none}
 
-/* Touch ID step */
-.fingerprint-wrap{position:relative;width:100px;height:100px;margin:0 auto 24px;display:flex;align-items:center;justify-content:center}
-.fp-ring{position:absolute;border-radius:50%;border:2px solid var(--primary);opacity:0;animation:fpPulse 2.4s ease-out infinite}
-.fp-ring:nth-child(1){width:60px;height:60px;animation-delay:0s}
-.fp-ring:nth-child(2){width:80px;height:80px;animation-delay:.4s}
-.fp-ring:nth-child(3){width:100px;height:100px;animation-delay:.8s}
-@keyframes fpPulse{0%{opacity:.7;transform:scale(.8)}100%{opacity:0;transform:scale(1.1)}}
-.fp-icon{width:52px;height:52px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px var(--primary-glow);z-index:1;position:relative}
-.fp-icon svg{width:28px;height:28px}
-.fp-paused .fp-ring{animation-play-state:paused}
 .auth-text-link{width:100%;background:none;border:none;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;margin-top:16px;text-align:center;padding:8px;border-radius:8px;transition:.2s}
 .auth-text-link:hover{color:var(--primary);background:rgba(108,99,255,.06)}
 
@@ -339,24 +329,8 @@ input,textarea,select{font-family:inherit;outline:none}
    ✦ ANIMATIONS & SIGNATURE EFFECTS ✦
    ══════════════════════════════════════════ */
 
-/* ── Aurora background orbs ── */
-.bg-orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
-.bg-orb{position:absolute;border-radius:50%;filter:blur(90px);animation:orbDrift ease-in-out infinite}
-.bg-orb-1{width:650px;height:650px;background:radial-gradient(circle at 40% 40%,rgba(108,99,255,.20),transparent 70%);top:-180px;left:-180px;animation-duration:24s}
-.bg-orb-2{width:550px;height:550px;background:radial-gradient(circle at 60% 60%,rgba(232,121,160,.15),transparent 70%);top:25%;right:-220px;animation-duration:31s;animation-delay:-9s}
-.bg-orb-3{width:480px;height:480px;background:radial-gradient(circle at 50% 50%,rgba(38,198,218,.13),transparent 70%);bottom:8%;left:5%;animation-duration:38s;animation-delay:-17s}
-.bg-orb-4{width:320px;height:320px;background:radial-gradient(circle at 50% 50%,rgba(255,112,67,.10),transparent 70%);bottom:35%;right:5%;animation-duration:21s;animation-delay:-5s}
-@keyframes orbDrift{
-  0%  {transform:translate(0,0) scale(1)}
-  25% {transform:translate(45px,-55px) scale(1.08)}
-  50% {transform:translate(-35px,45px) scale(.93)}
-  75% {transform:translate(55px,25px) scale(1.05)}
-  100%{transform:translate(0,0) scale(1)}
-}
-[data-theme="light"] .bg-orb-1{background:radial-gradient(circle at 40% 40%,rgba(108,99,255,.07),transparent 70%)}
-[data-theme="light"] .bg-orb-2{background:radial-gradient(circle at 60% 60%,rgba(232,121,160,.05),transparent 70%)}
-[data-theme="light"] .bg-orb-3{background:radial-gradient(circle at 50% 50%,rgba(38,198,218,.05),transparent 70%)}
-[data-theme="light"] .bg-orb-4{background:radial-gradient(circle at 50% 50%,rgba(255,112,67,.04),transparent 70%)}
+/* ── Particle network background ── */
+#bgCanvas{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:1}
 
 /* ── FX canvas & toast ── */
 #fxCanvas{position:fixed;inset:0;pointer-events:none;z-index:9999;display:none}
@@ -448,13 +422,7 @@ input,textarea,select{font-family:inherit;outline:none}
 </head>
 <body>
 
-<!-- ── Background aurora orbs ── -->
-<div class="bg-orbs" aria-hidden="true">
-  <div class="bg-orb bg-orb-1"></div>
-  <div class="bg-orb bg-orb-2"></div>
-  <div class="bg-orb bg-orb-3"></div>
-  <div class="bg-orb bg-orb-4"></div>
-</div>
+<canvas id="bgCanvas" aria-hidden="true"></canvas>
 <canvas id="fxCanvas"></canvas>
 <div id="toastEl"></div>
 
@@ -489,32 +457,7 @@ input,textarea,select{font-family:inherit;outline:none}
       <button class="auth-btn" id="continueBtn" onclick="continueWithPhone()">Continue →</button>
     </div>
 
-    <!-- Step 2a: Touch ID (Mac with biometric) -->
-    <div id="authStep2Touch" style="display:none">
-      <button class="auth-back" onclick="showAuthStep(1)">← Back</button>
-      <div class="fingerprint-wrap" id="fpWrap">
-        <div class="fp-ring"></div>
-        <div class="fp-ring"></div>
-        <div class="fp-ring"></div>
-        <div class="fp-icon">
-          <svg viewBox="0 0 28 28" fill="none" width="28" height="28">
-            <path d="M14 3C8.477 3 4 7.477 4 13c0 3.42 1.65 6.45 4.2 8.36" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
-            <path d="M14 3c5.523 0 10 4.477 10 10 0 3.42-1.65 6.45-4.2 8.36" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
-            <path d="M14 7a6 6 0 0 0-6 6c0 2.09.852 3.98 2.23 5.34" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
-            <path d="M14 7a6 6 0 0 1 6 6c0 2.09-.852 3.98-2.23 5.34" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
-            <path d="M14 11a2 2 0 0 0-2 2c0 1.105.672 2.056 1.636 2.474" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
-            <circle cx="14" cy="13" r="1" fill="white"/>
-          </svg>
-        </div>
-      </div>
-      <div class="auth-app-name" id="touchTitle">Touch ID</div>
-      <div class="auth-tagline" id="touchSub">Authenticate to access My Tasks</div>
-      <div class="auth-error" id="authError2Touch"></div>
-      <button class="auth-btn" id="touchBtn" onclick="doTouchID()">Sign in with Touch ID</button>
-      <button class="auth-text-link" onclick="switchToSMS()">Use SMS code instead →</button>
-    </div>
-
-    <!-- Step 2b: SMS OTP -->
+    <!-- Step 2: SMS OTP -->
     <div id="authStep2SMS" style="display:none">
       <button class="auth-back" onclick="showAuthStep(1)">← Back</button>
       <div class="otp-icon">💬</div>
@@ -546,13 +489,13 @@ input,textarea,select{font-family:inherit;outline:none}
       <div class="title">My Tasks</div>
     </div>
     <div class="header-right">
-      <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
       <div class="avatar-wrap">
         <div class="avatar" id="avatarBtn" onclick="toggleAvatarMenu()">M</div>
         <div class="avatar-menu" id="avatarMenu">
           <div class="avatar-email" id="avatarEmail"></div>
           <div class="avatar-menu-item" onclick="openCatManager();toggleAvatarMenu()">🏷 Manage Categories</div>
           <div class="avatar-menu-item" onclick="toggleTheme();toggleAvatarMenu()"><span id="avatarThemeIcon">🌙</span> Toggle theme</div>
+          <div class="avatar-menu-item" onclick="showCalendarModal();toggleAvatarMenu()">🍎 Apple Calendar Sync</div>
           <div class="avatar-menu-item danger" onclick="logout()">↩ Log out</div>
         </div>
       </div>
@@ -601,7 +544,6 @@ input,textarea,select{font-family:inherit;outline:none}
     <button class="tab" onclick="setFilter('Overdue',this)">Overdue</button>
     <button class="tab" onclick="setFilter('Done',this)">Done</button>
     <button class="tab" onclick="setFilter('Later',this)">Later</button>
-    <button class="tab" onclick="setFilter('All',this)">All</button>
   </div>
 
   <div class="task-list full-width" id="taskList"></div>
@@ -712,6 +654,23 @@ input,textarea,select{font-family:inherit;outline:none}
   </div>
 </div>
 
+<!-- ── Apple Calendar sync modal ──────────────────────────── -->
+<div class="overlay" id="calendarOverlay" onclick="closeCalendarModal(event)" style="z-index:160">
+  <div class="cat-mgr-sheet" style="max-height:420px">
+    <div class="sheet-handle"></div>
+    <div class="cat-mgr-title">🍎 Apple Calendar Sync</div>
+    <div class="cat-mgr-sub">Subscribe to keep your tasks in Apple Calendar — updates automatically.</div>
+    <div id="calUrlBox" style="display:none">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:8px">Your personal subscription URL:</div>
+      <div style="background:var(--card2);border:1.5px solid var(--border);border-radius:12px;padding:10px 12px;font-size:12px;word-break:break-all;color:var(--text);line-height:1.5;margin-bottom:14px" id="calUrlText"></div>
+      <a id="calWebcalLink" href="#" style="display:block;text-align:center;background:linear-gradient(135deg,#7C5FFF,#4B30E3);color:#fff;border-radius:12px;padding:13px;font-weight:700;font-size:15px;text-decoration:none;margin-bottom:10px">Open in Apple Calendar</a>
+      <button onclick="copyCalUrl()" style="width:100%;background:var(--card2);border:1.5px solid var(--border);border-radius:12px;padding:12px;font-size:14px;font-weight:600;color:var(--text);cursor:pointer">Copy URL</button>
+      <div style="font-size:12px;color:var(--text2);margin-top:14px;line-height:1.6;text-align:center">Or in Apple Calendar: <strong>File → New Calendar Subscription</strong> → paste URL</div>
+    </div>
+    <div id="calUrlLoading" style="text-align:center;padding:20px;color:var(--text2)">Generating your link…</div>
+  </div>
+</div>
+
 <!-- ── Task detail sheet ──────────────────────────────────── -->
 <div class="overlay" id="detailOverlay" onclick="closeDetail(event)">
   <div class="sheet detail-sheet">
@@ -783,38 +742,10 @@ async function api(method, path, body) {
   return data;
 }
 
-// ── WebAuthn helpers ───────────────────────────────────────
-function bufToBase64url(buf) {
-  return btoa(String.fromCharCode(...new Uint8Array(buf instanceof ArrayBuffer ? buf : buf.buffer)))
-    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-}
-function base64urlToBuf(str) {
-  const b64 = str.replace(/-/g, '+').replace(/_/g, '/');
-  const bin = atob(b64.padEnd(b64.length + (4 - b64.length % 4) % 4, '='));
-  return Uint8Array.from(bin, c => c.charCodeAt(0)).buffer;
-}
-function encodeCredential(cred) {
-  const encoded = {
-    id: cred.id,
-    rawId: bufToBase64url(cred.rawId),
-    type: cred.type,
-    authenticatorAttachment: cred.authenticatorAttachment || 'platform',
-    clientExtensionResults: cred.getClientExtensionResults?.() || {},
-    response: {},
-  };
-  const r = cred.response;
-  for (const key of ['clientDataJSON','attestationObject','authenticatorData','signature','userHandle']) {
-    if (r[key]) encoded.response[key] = bufToBase64url(r[key]);
-  }
-  if (r.getTransports) encoded.response.transports = r.getTransports();
-  return encoded;
-}
-
 // ── Auth: step management ──────────────────────────────────
 function showAuthStep(n) {
-  document.getElementById('authStep1').style.display      = n===1 ? '' : 'none';
-  document.getElementById('authStep2Touch').style.display = n===2 ? '' : 'none';
-  document.getElementById('authStep2SMS').style.display   = n===3 ? '' : 'none';
+  document.getElementById('authStep1').style.display    = n===1 ? '' : 'none';
+  document.getElementById('authStep2SMS').style.display = n===2 ? '' : 'none';
   if (n === 1) { authPhone = ''; clearResendTimer(); }
 }
 
@@ -836,21 +767,8 @@ async function continueWithPhone() {
   btn.disabled = true; btn.textContent = '…';
 
   try {
-    // Detect if Touch ID is available
-    const hasBiometric = window.PublicKeyCredential &&
-      (await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().catch(() => false));
-    const isMac = /Mac/.test(navigator.platform) && !/iPhone|iPad/.test(navigator.userAgent);
-
-    if (isMac && hasBiometric) {
-      // Check if user has a registered passkey
-      const { exists, hasWebAuthn } = await api('POST', '/api/auth/phone-check', { phone: authPhone });
-      setupTouchIDStep(exists, hasWebAuthn);
-      showAuthStep(2);
-    } else {
-      // SMS path
-      await sendOTP();
-      showAuthStep(3);
-    }
+    await sendOTP();
+    showAuthStep(2);
   } catch(e) {
     showAuthError('authError1', e.message);
   } finally {
@@ -858,77 +776,6 @@ async function continueWithPhone() {
   }
 }
 
-// ── Touch ID flow ──────────────────────────────────────────
-function setupTouchIDStep(exists, hasWebAuthn) {
-  const isNew = !exists || !hasWebAuthn;
-  document.getElementById('touchTitle').textContent = isNew ? 'Set Up Touch ID' : 'Touch ID';
-  document.getElementById('touchSub').textContent = isNew
-    ? 'Register your fingerprint to sign in instantly next time'
-    : 'Use Touch ID to access My Tasks';
-  document.getElementById('touchBtn').textContent = isNew ? 'Register Touch ID' : 'Sign in with Touch ID';
-  document.getElementById('touchBtn').onclick = isNew ? registerTouchID : loginTouchID;
-}
-
-async function registerTouchID() {
-  const btn = document.getElementById('touchBtn');
-  btn.disabled = true; btn.textContent = 'Waiting for Touch ID…';
-  hideAuthError('authError2Touch');
-  document.getElementById('fpWrap').classList.remove('fp-paused');
-  try {
-    const options = await api('POST', '/api/auth/webauthn/register-options', { phone: authPhone });
-
-    // Decode server options for browser WebAuthn API
-    const publicKey = {
-      ...options,
-      challenge: base64urlToBuf(options.challenge),
-      user: { ...options.user, id: base64urlToBuf(options.user.id) },
-      excludeCredentials: (options.excludeCredentials || []).map(c => ({ ...c, id: base64urlToBuf(c.id) })),
-    };
-
-    const credential = await navigator.credentials.create({ publicKey });
-    const data = await api('POST', '/api/auth/webauthn/register', {
-      phone: authPhone,
-      credential: encodeCredential(credential),
-    });
-    await onAuthSuccess(data);
-  } catch(e) {
-    document.getElementById('fpWrap').classList.add('fp-paused');
-    showAuthError('authError2Touch', e.name === 'NotAllowedError' ? 'Touch ID was cancelled or not available' : e.message);
-    btn.disabled = false; btn.textContent = 'Register Touch ID';
-  }
-}
-
-async function loginTouchID() {
-  const btn = document.getElementById('touchBtn');
-  btn.disabled = true; btn.textContent = 'Waiting for Touch ID…';
-  hideAuthError('authError2Touch');
-  document.getElementById('fpWrap').classList.remove('fp-paused');
-  try {
-    const options = await api('POST', '/api/auth/webauthn/login-options', { phone: authPhone });
-
-    const publicKey = {
-      ...options,
-      challenge: base64urlToBuf(options.challenge),
-      allowCredentials: (options.allowCredentials || []).map(c => ({ ...c, id: base64urlToBuf(c.id) })),
-    };
-
-    const credential = await navigator.credentials.get({ publicKey });
-    const data = await api('POST', '/api/auth/webauthn/login', {
-      phone: authPhone,
-      credential: encodeCredential(credential),
-    });
-    await onAuthSuccess(data);
-  } catch(e) {
-    document.getElementById('fpWrap').classList.add('fp-paused');
-    showAuthError('authError2Touch', e.name === 'NotAllowedError' ? 'Touch ID was cancelled' : e.message);
-    btn.disabled = false; btn.textContent = 'Sign in with Touch ID';
-  }
-}
-
-async function switchToSMS() {
-  await sendOTP();
-  showAuthStep(3);
-}
 
 // ── SMS OTP flow ───────────────────────────────────────────
 async function sendOTP() {
@@ -1040,7 +887,6 @@ document.addEventListener('click', e => {
 async function initApp() {
   const t = localStorage.getItem('theme') || 'dark';
   document.documentElement.dataset.theme = t;
-  document.getElementById('themeBtn').textContent = t==='dark'?'🌙':'☀️';
   document.getElementById('avatarThemeIcon').textContent = t==='dark'?'🌙':'☀️';
   setGreeting();
   // Load server-side config (Gemini key etc.)
@@ -1580,7 +1426,6 @@ function setFilter(f,el){state.filter=f;document.querySelectorAll('.tab').forEac
 function toggleTheme(){
   const d=document.documentElement.dataset.theme==='dark';
   document.documentElement.dataset.theme=d?'light':'dark';
-  document.getElementById('themeBtn').textContent=d?'☀️':'🌙';
   document.getElementById('avatarThemeIcon').textContent=d?'☀️':'🌙';
   localStorage.setItem('theme',d?'light':'dark');
 }
@@ -1623,6 +1468,32 @@ async function sendAIPrompt(text){
 }
 
 // ── Boot ──────────────────────────────────────────────────
+// ── Apple Calendar modal ──────────────────────────────────
+let _calUrl = '';
+async function showCalendarModal() {
+  document.getElementById('calendarOverlay').classList.add('open');
+  document.getElementById('calUrlBox').style.display = 'none';
+  document.getElementById('calUrlLoading').style.display = '';
+  if (!_calUrl) {
+    try {
+      const d = await api('GET', '/api/user/calendar-token');
+      _calUrl = d.url;
+    } catch (e) { showToast('Could not generate calendar URL'); closeCalendarModal(); return; }
+  }
+  document.getElementById('calUrlText').textContent = _calUrl;
+  const webcal = _calUrl.replace(/^https?:/, 'webcal:');
+  document.getElementById('calWebcalLink').href = webcal;
+  document.getElementById('calUrlLoading').style.display = 'none';
+  document.getElementById('calUrlBox').style.display = '';
+}
+function closeCalendarModal(e) {
+  if (!e || e.target === document.getElementById('calendarOverlay'))
+    document.getElementById('calendarOverlay').classList.remove('open');
+}
+function copyCalUrl() {
+  navigator.clipboard.writeText(_calUrl).then(() => showToast('URL copied! 📋'));
+}
+
 // ══════════════════════════════════════════
 // ✦ ANIMATION ENGINE ✦
 // ══════════════════════════════════════════
@@ -1743,6 +1614,60 @@ function initCardTilt() {
     card.addEventListener('mouseleave',()=>{card.style.transform='';});
   });
 }
+
+// ── Particle network background ───────────────────────────
+(function(){
+  const cv = document.getElementById('bgCanvas');
+  const cx = cv.getContext('2d');
+  const N = 68, LINK = 130, SPEED = 0.45;
+  let pts = [], W, H, isDark = true;
+
+  function resize() {
+    W = cv.width  = window.innerWidth;
+    H = cv.height = window.innerHeight;
+  }
+  function init() {
+    pts = [];
+    for (let i = 0; i < N; i++) pts.push({
+      x: Math.random() * W, y: Math.random() * H,
+      vx: (Math.random() - .5) * SPEED, vy: (Math.random() - .5) * SPEED,
+    });
+  }
+  function tick() {
+    cx.clearRect(0, 0, W, H);
+    isDark = document.documentElement.dataset.theme !== 'light';
+    const dotClr = isDark ? 'rgba(150,130,255,' : 'rgba(100,80,220,';
+    const lineClr = isDark ? '108,99,255,' : '90,75,200,';
+
+    for (let i = 0; i < N; i++) {
+      const p = pts[i];
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0 || p.x > W) p.vx *= -1;
+      if (p.y < 0 || p.y > H) p.vy *= -1;
+      for (let j = i + 1; j < N; j++) {
+        const q = pts[j];
+        const dx = p.x - q.x, dy = p.y - q.y;
+        const d = Math.sqrt(dx*dx + dy*dy);
+        if (d < LINK) {
+          const a = (1 - d / LINK) * (isDark ? 0.28 : 0.15);
+          cx.beginPath();
+          cx.strokeStyle = `rgba(${lineClr}${a})`;
+          cx.lineWidth = isDark ? 0.8 : 0.6;
+          cx.moveTo(p.x, p.y); cx.lineTo(q.x, q.y);
+          cx.stroke();
+        }
+      }
+      cx.beginPath();
+      cx.fillStyle = dotClr + (isDark ? '0.55)' : '0.35)');
+      cx.arc(p.x, p.y, isDark ? 2.2 : 1.8, 0, Math.PI * 2);
+      cx.fill();
+    }
+    requestAnimationFrame(tick);
+  }
+
+  window.addEventListener('resize', () => { resize(); init(); });
+  resize(); init(); tick();
+})();
 
 initApp();
 </script>
